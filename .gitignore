@@ -33,3 +33,6 @@ npm-debug.log
 
 # Private directory for keys and such
 private
+
+# Ignore JMdict file
+.xml
