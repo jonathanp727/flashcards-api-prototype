@@ -35,4 +35,4 @@ npm-debug.log
 private
 
 # Ignore JMdict file
-.xml
+JMdict_edited.xml

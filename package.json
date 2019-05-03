@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www --exec babel-node",
-    "load-jlpt": "nodemon ./db/jlpt-scraper.js --exec babel-node"
+    "load-jlpt": "nodemon ./db/jlpt-scraper.js --exec babel-node",
+    "load-dict": "nodemon ./db/xml-processor-mdb.js --exec babel-node"
   },
   "babel": {
     "presets": [
@@ -28,8 +29,10 @@
     "@babel/preset-env": "^7.4.4",
     "@babel/preset-stage-2": "^7.0.0",
     "cheerio": "^1.0.0-rc.3",
+    "jsonify": "0.0.0",
     "nodemon": "^1.19.0",
     "request": "^2.88.0",
-    "request-promise": "^4.2.4"
+    "request-promise": "^4.2.4",
+    "xml2json": "^0.11.2"
   }
 }

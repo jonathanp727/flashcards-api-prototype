@@ -57,8 +57,8 @@ urls.forEach(url => {
 });
 
 // Insert data into db
-MongoClient.connectToServer(() => {
-  const db = MongoClient.getDb();
+MongoClient.connectToServer((err, db) => {
+  if (err) throw err;
   Promise.all(promises).then(levels => {
     levels.forEach((words, index) => {
       const jlptStr = `n${index+1}`;
