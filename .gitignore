@@ -34,5 +34,6 @@ npm-debug.log
 # Private directory for keys and such
 private
 
-# Ignore JMdict file
+# Ignore data files
 JMdict_edited.xml
+examples_pd-utf-8

@@ -6,7 +6,8 @@
     "start": "nodemon ./bin/www --exec babel-node",
     "load-jlpt": "nodemon ./db/jlpt-scraper.js --exec babel-node",
     "load-dict": "nodemon ./db/xml-processor-mdb.js --exec babel-node",
-    "assign-jlpt": "nodemon ./db/jlpt-assigner.js --exec babel-node"
+    "assign-jlpt": "nodemon ./db/jlpt-assigner.js --exec babel-node",
+    "load-reibun": "nodemon ./db/reibun/loader --exec babel-node"
   },
   "babel": {
     "presets": [
