@@ -1,3 +1,5 @@
+// Loads sentences from file into mongo database
+
 import fs from 'fs';
 import path from 'path';
 import MongoClient from '../../lib/MongoClient';
@@ -20,7 +22,7 @@ MongoClient.connectToServer(async (err, res) => {
       const reibunEnd = line.indexOf(' ', 3);
       const reibun = line.substring(3, reibunEnd);
       
-      // find start of english sentence (skip gender marks)
+      // find start of english sentence (skip gender marks ([M], [F]) )
       let i = reibunEnd;
       while (line[i] === ' ') {
         i += 1;
