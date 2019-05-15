@@ -9,7 +9,8 @@
     "assign-jlpt": "nodemon ./db/jlpt-assigner.js --exec babel-node",
     "load-reibun": "nodemon ./db/reibun/loader.js --exec babel-node",
     "process-reibun": "nodemon ./db/reibun/processor.js --exec babel-node",
-    "test": "nodemon ./lib/MeCabWrapper --exec babel-node"
+    "test": "nodemon ./lib/MeCabWrapper --exec babel-node",
+    "migrate": "nodemon ./db/migration/add_sentence_field_to_dict_entries.js --exec babel-node"
   },
   "babel": {
     "presets": [
