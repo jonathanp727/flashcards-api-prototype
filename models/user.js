@@ -21,8 +21,13 @@ exports.new = (data, callback) => {
     username: data.username,
     password: data.password,
     isAdmin: false,
-    words: [],
+    words: {},
     cards: [],
+    upcoming: [],
+    jlpt: {
+      level: data.level,
+      index: 0,
+    }
   }, (err, result) => {
     callback(err, result);
   });
