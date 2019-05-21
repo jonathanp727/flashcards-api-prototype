@@ -1,6 +1,8 @@
 import { ObjectId } from 'mongodb';
 
 import MongoClient from '../lib/MongoClient';
+import { getNextWords } from './card';
+import { DEFAULT_WORD_SCHEMA } from './word';
 
 const COLL_NAME = 'users';
 
@@ -11,8 +13,19 @@ exports.all = (callback) => {
 };
 
 exports.get = (id, callback) => {
-  MongoClient.getDb().collection(COLL_NAME).findOne({ _id: ObjectId(id) }, (err, result) => {
-    callback(err, result);
+  MongoClient.getDb().collection(COLL_NAME).findOne({ _id: ObjectId(id) }, (err, user) => {
+    if (err) callback(err);
+
+    getNextWords(user, (err2, words) => {
+      if (err2) callback(err2);
+      words.forEach(wordId => {
+        user.upcoming.push(wordId)
+        user.words[wordId] = Object.assign({}, DEFAULT_WORD_SCHEMA );
+        user.words[wordId].upcoming = true;
+      });
+
+      callback(err2, user);
+    });
   });
 };
 
@@ -27,7 +40,7 @@ exports.new = (data, callback) => {
     jlpt: {
       level: data.level,
       index: 0,
-    }
+    },
   }, (err, result) => {
     callback(err, result);
   });

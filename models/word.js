@@ -5,6 +5,13 @@ import { shouldCreateCard } from '../lib/cardLogic';
 
 const COLL_NAME = 'users';
 
+export const DEFAULT_WORD_SCHEMA = {
+  card: null,
+  count: 0,
+  dates: [],
+  upcoming: false,
+}
+
 /**
  * Increments the lookup counter of a word for a particular user and determines
  * if the word should be added to the "upcoming" flashcards array.
