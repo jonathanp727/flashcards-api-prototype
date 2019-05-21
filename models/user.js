@@ -12,19 +12,42 @@ exports.all = (callback) => {
   });
 };
 
+// Standard user get
 exports.get = (id, callback) => {
   MongoClient.getDb().collection(COLL_NAME).findOne({ _id: ObjectId(id) }, (err, user) => {
-    if (err) callback(err);
+    callback(err, user);
+  });
+};
 
+// Get user as well as checking for and creating upcoming cards as necessary
+exports.getWithNewCards = (id, callback) => {
+  MongoClient.getDb().collection(COLL_NAME).findOne({ _id: ObjectId(id) }, (err, user) => {
+    if (err) return callback(err);
+
+    // Check and add more words if upcoming isn't full
     getNextWords(user, (err2, words) => {
-      if (err2) callback(err2);
+      const schema = Object.assign({}, DEFAULT_WORD_SCHEMA);
+      schema.upcoming = true;
+      const setWordsQuery = {};
+      if (err2) return callback(err2);
+
       words.forEach(wordId => {
+        setWordsQuery[`words.${wordId}`] = schema;
         user.upcoming.push(wordId)
-        user.words[wordId] = Object.assign({}, DEFAULT_WORD_SCHEMA );
-        user.words[wordId].upcoming = true;
+        user.words[wordId] = schema;
       });
 
-      callback(err2, user);
+      // Update user in database with upcoming cards if found, otherwise return
+      if (words.length > 0) {
+        MongoClient.getDb().collection(COLL_NAME).updateOne({ _id: ObjectId(id) }, {
+          $push: { upcoming: { $each: words }},
+          $set: setWordsQuery,
+        }, err3 => {
+          callback(err3, user);
+        });
+      } else {
+        callback(err2, user);
+      }
     });
   });
 };

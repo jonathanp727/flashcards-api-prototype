@@ -14,7 +14,7 @@ import { DAILY_NEWCARD_LIMIT } from '../lib/cardLogic';
  * @return Array
  */
 exports.getNextWords = async (user, callback) => {
-  if (user.upcoming.length >= DAILY_NEWCARD_LIMIT) callback(null, []);
+  if (user.upcoming.length >= DAILY_NEWCARD_LIMIT) return callback(null, []);
 
   const numCardsToAdd = DAILY_NEWCARD_LIMIT - user.upcoming.length;
   const cursor = MongoClient.getDb().collection('dictionary').find({
