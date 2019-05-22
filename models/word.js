@@ -6,10 +6,15 @@ import { shouldCreateCard } from '../lib/cardLogic';
 const COLL_NAME = 'users';
 
 export const DEFAULT_WORD_SCHEMA = {
-  card: null,
+  card: {
+    ef: 2.5,
+    n: 0,
+    interval: 0,
+    date: null,     // A null date can be used to signify that there is no actual card for this word
+  },
   count: 0,
   dates: [],
-  upcoming: false,
+  upcoming: false,  // States whether the word is in the user's 'upcoming' arr for words that will soon be added to deck
 }
 
 /**
@@ -31,12 +36,9 @@ exports.increment = (data, callback) => {
     // Retrieve and update word entry if exists, otherwise create
     let word = user.words[wordId];
     if (!word) {
-      word = {
-        card: null,
-        count: 1,
-        dates: [date],
-        upcoming: false,
-      };
+      word = Object.assign({}, DEFAULT_WORD_SCHEMA);
+      word.count = 1;
+      word.dates.push(date);
     } else {
       word.count += 1;
       word.dates.push(date);
@@ -47,7 +49,7 @@ exports.increment = (data, callback) => {
     let query = {};
 
     // If no card, do check and create if necessary
-    if (word.card === null && !word.upcoming && shouldCreateCard(user, word, wordJlpt.level)) {
+    if (word.card.date === null && !word.upcoming && shouldCreateCard(user, word, wordJlpt.level)) {
       word.upcoming = true;
       query.$push = { upcoming: wordId };
     }
