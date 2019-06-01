@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 
 import MongoClient from '../lib/MongoClient';
 import { DAILY_NEWCARD_LIMIT, processCardInterval } from '../lib/cardLogic';
+import { DEFAULT_WORD_SCHEMA } from './word';
 
 /**
  * Checks the users 'upcoming' flashcards.  If there are less than the daily limit, returns
@@ -93,6 +94,44 @@ exports.doCard = (data, callback) => {
       }, err => {
         callback(err);
       });
+    });
+  });
+}
+
+/**
+ * Creates card manually for user.  Fails if card already exists.
+ *
+ * @param userId   ObjectId
+ * @param wordId   ObjectId
+ * @param upcoming Boolean     True if card is in upcoming arr and not in cards arr
+ * @param response Number (from 1 to 5)
+ */
+exports.createCard = (data, callback) => {
+  const { userId, wordId } = data;
+
+  // Checks if word exists in user's data
+  MongoClient.getDb().collection('users').findOne({
+    _id: ObjectId(userId),
+    [`words.${wordId}`]: { $exists: true },
+  }, (err, user) => {
+    if (err) return callback(err);
+
+    const word = Object.assign({}, DEFAULT_WORD_SCHEMA);
+    word.upcoming = true;
+
+    let query = { $push: { upcoming: wordId } };
+    // If word doesn't exist, set it up and append to upcoming
+    if (!user) {
+      query.$set = { [`words.${wordId}`]: word };
+    // If word does exist, check if card date is null to determine if card exists or not
+    } else if (user.words[wordId].card.date === null && !user.words[wordId].upcoming) {
+      query.$set = { [`words.${wordId}.upcoming`]: true };
+    } else {
+      return callback(new Error('Card already exists for this word'));
+    }
+
+    MongoClient.getDb().collection('users').updateOne({ _id: ObjectId(userId) }, query, err => {
+      callback(err);
     });
   });
 }
