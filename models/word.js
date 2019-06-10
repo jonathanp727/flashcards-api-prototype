@@ -60,3 +60,26 @@ exports.increment = (data, callback) => {
     });
   });
 }
+
+exports.lookup = (query, callback) => {
+  if (query.charCodeAt(0) > 255) {
+    // word is japanese
+    MongoClient.getDb().collection('dictionary').find({
+      $or: [
+        { 'r_ele.reb': query },
+        { 'k_ele.keb': query },
+      ],
+    }).project({ sentences: 0 }).toArray((err, res) => {
+      callback(err, res);
+    });
+  } else {
+    // word is english
+    MongoClient.getDb().collection('dictionary').find({
+      $text: { $search: `\"${query}\"` },
+    }, {
+      score: { $meta: "textScore" },
+    }).project({ sentences: 0 }).toArray((err, res) => {
+      callback(err, res);
+    });
+  }
+}

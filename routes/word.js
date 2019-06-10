@@ -12,3 +12,11 @@ router.post('/', (req, res, next) => {
 });
 
 module.exports = router;
+
+// look up in dictionary
+router.get('/:word', (req, res, next) => {
+  WordModel.lookup(req.params.word, (err, result) => {
+    if (err) return next(err);
+    res.json(result);
+  });
+});
