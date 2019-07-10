@@ -37,3 +37,7 @@ private
 # Ignore data files
 JMdict_edited.xml
 examples_pd-utf-8
+
+# Random files to not commit
+test.js
+todo.txt

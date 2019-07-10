@@ -27,7 +27,7 @@ export const DEFAULT_WORD_SCHEMA = {
  *   wordJlpt: { level: Number, index: Number }
  */
 exports.increment = (data, callback) => {
-  const { userId, wordId, wordJlpt } = data;
+  const { userId, wordId, wordJlpt = { level: 0 } } = data;
 
   const date = new Date().getTime();
   MongoClient.getDb().collection(COLL_NAME).findOne({
