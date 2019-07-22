@@ -13,7 +13,7 @@ router.get('/', (req, res, next) => {
 
 // show
 router.get('/:id', (req, res, next) => {
-  UserModel.getWithNewCards(req.params.id, (err, value) => {
+  UserModel.condGetWithNewCards(req.params.id, (err, value) => {
     if (err) return next(err);
     res.json(value);
   });

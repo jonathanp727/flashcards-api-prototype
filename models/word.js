@@ -83,3 +83,13 @@ exports.lookup = (query, callback) => {
     });
   }
 }
+
+// Get a single word entry from dictionary
+exports.get = (wordId) => (
+  new Promise((resolve, reject) => {
+    MongoClient.getDb().collection('dictionary').findOne({ _id: ObjectId(wordId)}, (err, word) => {
+      if (err) reject(err);
+      else resolve(word);
+    });
+  })
+)
