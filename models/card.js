@@ -86,7 +86,7 @@ exports.doCard = (data, callback) => {
       MongoClient.getDb().collection('users').updateOne({ _id: ObjectId(userId) }, {
         $set: {
           [`words.${wordId}.card`]: card,
-          upcoming: false    // Set upcoming to false every time (in reality this is only necessary the first time the card is seen)
+          [`words.${wordId}.upcoming`]: false    // Set upcoming to false every time (in reality this is only necessary the first time the card is seen)
         },
         $push: {
           'cards': {
