@@ -84,7 +84,10 @@ exports.doCard = (data, callback) => {
       // Make seperate db query for push operation since you can't push and pull in same op
       // This is only necessary if the card isn't in upcoming to begin, consider combining queries in future if it is
       MongoClient.getDb().collection('users').updateOne({ _id: ObjectId(userId) }, {
-        $set: { [`words.${wordId}.card`]: card },
+        $set: {
+          [`words.${wordId}.card`]: card,
+          upcoming: false    // Set upcoming to false every time (in reality this is only necessary the first time the card is seen)
+        },
         $push: {
           'cards': {
             '$each': [ ObjectId(wordId) ],
