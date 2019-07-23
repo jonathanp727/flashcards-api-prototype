@@ -26,7 +26,7 @@ exports.getWithNewCards = (id, callback) => {
     if (err) return callback(err);
 
     // Check and add more words if upcoming isn't full
-    getNextWords(user, (err2, words) => {
+    getNextWords(user, (err2, words, newJlpt) => {
       const schema = Object.assign({}, DEFAULT_WORD_SCHEMA);
       schema.upcoming = true;
       const setWordsQuery = {};
@@ -36,15 +36,15 @@ exports.getWithNewCards = (id, callback) => {
         setWordsQuery[`words.${wordId}`] = schema;
         setWordsQuery.lastWordRetrieval = new Date().getTime();
         user.upcoming.push(wordId)
-        user.words[wordId] = schema;
+        user.words[wordId] = Object.assign({}, schema);
       });
 
       // Update user in database with upcoming cards if new words should be added, otherwise return
       if (words.length > 0) {
         MongoClient.getDb().collection(COLL_NAME).updateOne({ _id: ObjectId(id) }, {
           $push: { upcoming: { $each: words }},
-          $set: setWordsQuery,
-        }, err3 => {
+          $set: { ...setWordsQuery, jlpt: newJlpt },
+        }, (err3) => {
           callback(err3, user);
         });
       } else {
@@ -74,7 +74,8 @@ exports.condGetWithNewCards = (id, callback) => {
 // Convert user wordIDs into dict entries
 exports.joinDict = async (user) => {
   for (let wordId in user.words) {
-    user.words[wordId].entry = await get(wordId);
+    let entry = await get(wordId);
+    user.words[wordId].entry = entry;
   }
   return user;
 }
