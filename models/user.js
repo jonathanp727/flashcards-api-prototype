@@ -15,7 +15,9 @@ exports.all = (callback) => {
 
 // Standard user get
 exports.get = (id, callback) => {
+  console.log(id);
   MongoClient.getDb().collection(COLL_NAME).findOne({ _id: ObjectId(id) }, (err, user) => {
+    console.log(user);
     callback(err, user);
   });
 };
