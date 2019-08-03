@@ -51,7 +51,7 @@ exports.increment = (data, callback) => {
     // If no card, do check and create if necessary
     if (word.card.date === null && !word.upcoming && shouldCreateCard(user, word, wordJlpt.level)) {
       word.upcoming = true;
-      query.$push = { upcoming: wordId };
+      query.$push = { upcoming: ObjectId(wordId) };
     }
     query.$set = { [`words.${wordId}`]: word };
 
