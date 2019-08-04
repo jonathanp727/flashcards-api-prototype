@@ -75,15 +75,9 @@ exports.doCard = (data, callback) => {
       if (err2) return callback(err2);
 
       const card = processCardInterval(user.words[wordId].card, response);
-      const { cards } = user;
 
       // Find new position of card
-      let pos = 0;
-      let t;
-      
-      while (pos < user.cards.length && card.date > new Date(user.words[cards[pos]].card.date)) {
-        pos += 1;
-      }
+      const pos = exports.getNewCardPos(user, card);
 
       // Make seperate db query for push operation since you can't push and pull in same op
       // This is only necessary if the card isn't in upcoming to begin, consider combining queries in future if it is
@@ -102,6 +96,10 @@ exports.doCard = (data, callback) => {
         callback(err);
       });
     });
+
+
+
+
   });
 }
 
@@ -141,4 +139,23 @@ exports.createCard = (data, callback) => {
       callback(err);
     });
   });
+}
+
+/**
+ * Finds the new position in the user.cards array for `card` to be placed at.  Make sure to pull
+ * the card from user before calling this function.
+ *
+ * @param user     Object
+ * @param card     Object
+ * @return Number (new position)
+ */
+exports.getNewCardPos = (user, card) => {
+  const { cards } = user;
+  let pos = 0;
+  
+  while (pos < user.cards.length && card.date > new Date(user.words[cards[pos]].card.date)) {
+    pos += 1;
+  }
+
+  return pos;
 }

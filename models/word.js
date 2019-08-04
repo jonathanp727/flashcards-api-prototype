@@ -1,7 +1,8 @@
 import { ObjectId } from 'mongodb';
 
 import MongoClient from '../lib/MongoClient';
-import { shouldCreateCard } from '../lib/cardLogic';
+import { shouldCreateCard, incExistingCard } from '../lib/cardLogic';
+import { getNewCardPos } from './card.js';
 
 const COLL_NAME = 'users';
 
@@ -28,7 +29,7 @@ exports.increment = (data, callback) => {
   const date = new Date().getTime();
   MongoClient.getDb().collection(COLL_NAME).findOne({
     _id: ObjectId(userId),
-  }, (err, user) => {
+  }, async (err, user) => {
     // Retrieve and update word entry if exists, otherwise create
     let word = user.words[wordId];
     if (!word) {
@@ -48,12 +49,29 @@ exports.increment = (data, callback) => {
     if (word.card === null && !word.upcoming) {
       var { newCard, isNew } = shouldCreateCard(user, word, wordJlpt.level, kindaKnew);
       if (newCard !== null) {
-        word.card = res;
+        word.card = newCard;
         word.upcoming = isNew;
         if (word.upcoming) {
           query.$push = { upcoming: ObjectId(wordId) };
+        } else {
+          query.$push = {
+            cards: {
+              '$each': [ ObjectId(wordId) ],
+              '$position': getNewCardPos(user, newCard),
+            },
+          };
         }
       }
+    // Else update existing card
+    } else {
+      await pullCard(userId, wordId);
+      word.card = incExistingCard(word.card, kindaKnew);
+      query.$push = {
+        cards: {
+          '$each': [ ObjectId(wordId) ],
+          '$position': getNewCardPos(user, newCard),
+        },
+      };
     }
     query.$set = { [`words.${wordId}`]: word };
 
@@ -95,3 +113,15 @@ exports.get = (wordId) => (
     });
   })
 )
+
+// Helper function because I needed an async/await way to pull card before pushing into new position
+const pullCard = (userId, wordId) => (
+  new Promise((resolve, reject) => {
+    MongoClient.getDb().collection('users').updateOne({ _id: ObjectId(userId)},
+      { $pull: { cards: ObjectId(wordId) } },
+      err => {
+        if (err) reject(err);
+        else resolve();
+    });
+  })
+);
