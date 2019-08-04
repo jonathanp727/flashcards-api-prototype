@@ -6,12 +6,7 @@ import { shouldCreateCard } from '../lib/cardLogic';
 const COLL_NAME = 'users';
 
 export const DEFAULT_WORD_SCHEMA = {
-  card: {
-    ef: 2.5,
-    n: 0,
-    interval: 0,
-    date: null,     // A null date can be used to signify that there is no actual card for this word
-  },
+  card: null,
   count: 0,
   dates: [],
   upcoming: false,  // States whether the word is in the user's 'upcoming' arr for words that will soon be added to deck
@@ -24,10 +19,11 @@ export const DEFAULT_WORD_SCHEMA = {
  * @param data [Object]
  *   userId: ObjectId,
  *   wordId: ObjectId,
+ #   kindaKnew: boolean,   // Marks whether the user kind of knew the word or didn't at all
  *   wordJlpt: { level: Number, index: Number }
  */
 exports.increment = (data, callback) => {
-  const { userId, wordId, wordJlpt = { level: 0 } } = data;
+  const { userId, wordId, wordJlpt = { level: 0 }, kindaKnew } = data;
 
   const date = new Date().getTime();
   MongoClient.getDb().collection(COLL_NAME).findOne({
@@ -38,10 +34,10 @@ exports.increment = (data, callback) => {
     if (!word) {
       word = Object.assign({}, DEFAULT_WORD_SCHEMA);
       word.count = 1;
-      word.dates.push(date);
+      word.dates.push({ date, kindaKnew });
     } else {
       word.count += 1;
-      word.dates.push(date);
+      word.dates.push({ date, kindaKnew });
     }
 
     word.latestIncrement = date;
@@ -49,9 +45,15 @@ exports.increment = (data, callback) => {
     let query = {};
 
     // If no card, do check and create if necessary
-    if (word.card.date === null && !word.upcoming && shouldCreateCard(user, word, wordJlpt.level)) {
-      word.upcoming = true;
-      query.$push = { upcoming: ObjectId(wordId) };
+    if (word.card === null && !word.upcoming) {
+      var { newCard, isNew } = shouldCreateCard(user, word, wordJlpt.level, kindaKnew);
+      if (newCard !== null) {
+        word.card = res;
+        word.upcoming = isNew;
+        if (word.upcoming) {
+          query.$push = { upcoming: ObjectId(wordId) };
+        }
+      }
     }
     query.$set = { [`words.${wordId}`]: word };
 
